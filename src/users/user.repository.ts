@@ -13,26 +13,44 @@ export class UserRepository {
     return this.users;
   }
 
-  async update(id: string, updateData: Partial<User>) {
+  private searchForId(id: string) {
     const possibleUser = this.users.find((findUser) => findUser.id === id);
     if (!possibleUser) {
       throw new NotFoundException('Usuário não existe');
     }
+
+    return possibleUser;
+  }
+
+  async update(id: string, updateData: Partial<User>) {
+    const user = this.searchForId(id);
 
     Object.entries(updateData).forEach(([key, value]) => {
       if (key === 'id') {
         return;
       }
 
-      possibleUser[key] = value;
+      user[key] = value;
     });
 
-    return possibleUser;
+    return user;
   }
 
   async isUserWithEmail(email: string) {
     const possibleUser = this.users.find((user) => user.email === email);
 
     return possibleUser !== undefined;
+  }
+
+  async remove(id: string) {
+    const userForDelete = this.searchForId(id);
+
+    this.users = this.users.filter((user) => userForDelete.id !== user.id);
+
+    return {
+      id: userForDelete.id,
+      name: userForDelete.name,
+      email: userForDelete.email,
+    };
   }
 }

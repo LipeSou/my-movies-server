@@ -1,17 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
-import type { User } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { ListUserDTO } from './dto/list-user.dto';
+import type { CreateUserDto } from './dto/create-user.dto';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class UsersService {
   constructor(private userRepository: UserRepository) {}
 
-  create(createUserDto: User) {
-    this.userRepository.save(createUserDto);
+  create(createUserDto: CreateUserDto) {
+    const userEntity = new User();
+    userEntity.email = createUserDto.email;
+    userEntity.name = createUserDto.name;
+    userEntity.password = createUserDto.password;
+    userEntity.id = uuid();
+
+    this.userRepository.save(userEntity);
     return {
       message: 'Usuário criado com sucesso!',
-      user: new ListUserDTO(createUserDto.id, createUserDto.name),
+      user: new ListUserDTO(userEntity.id, createUserDto.name),
     };
   }
 
@@ -34,7 +42,11 @@ export class UsersService {
     return { message: 'Usuário foi atualizado com sucesso!', id };
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    const removedUser = await this.userRepository.remove(id);
+    return {
+      usuario: removedUser,
+      message: 'Usuário removido com sucesso',
+    };
   }
 }
