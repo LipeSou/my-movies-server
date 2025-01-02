@@ -23,13 +23,19 @@ export class UsersService {
     this.userRepository.save(userEntity);
     return {
       message: 'Usuário criado com sucesso!',
-      user: new ListUserDTO(userEntity.id, createUserDto.name),
+      user: new ListUserDTO(
+        userEntity.id,
+        createUserDto.name,
+        userEntity.email,
+      ),
     };
   }
 
   async findAll() {
     const userSaves = await this.userRepository.find();
-    const users = userSaves.map((user) => new ListUserDTO(user.id, user.name));
+    const users = userSaves.map(
+      (user) => new ListUserDTO(user.id, user.name, user.email),
+    );
     return users;
   }
 
@@ -40,7 +46,7 @@ export class UsersService {
     if (!user) {
       throw new Error('Usuário não encontrado');
     }
-    return new ListUserDTO(user.id, user.name);
+    return new ListUserDTO(user.id, user.name, user.email);
   }
 
   async update(id: string, updateUserDto: Partial<CreateUserDto>) {
@@ -57,7 +63,7 @@ export class UsersService {
     const removedUser = await this.userRepository.delete(id);
 
     if (removedUser.affected === 0) {
-      throw new NotFoundException('Não foi encontrado o usuário');
+      throw new NotFoundException('Não foi encontrado o usuário!');
     }
 
     return {

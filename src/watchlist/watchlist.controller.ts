@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { WatchlistService } from './watchlist.service';
 import { CreateWatchlistDto } from './dto/create-watchlist.dto';
-import { UpdateWatchlistDto } from './dto/update-watchlist.dto';
+import { UpdateWatchlistDto } from './dto/list-watchlist.dto';
 
 @Controller('watchlist')
 export class WatchlistController {
@@ -13,22 +21,25 @@ export class WatchlistController {
   }
 
   @Get()
-  findAll() {
-    return this.watchlistService.findAll();
+  findAllByUser() {
+    return this.watchlistService.findAllByUser();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.watchlistService.findOne(+id);
+    return this.watchlistService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWatchlistDto: UpdateWatchlistDto) {
-    return this.watchlistService.update(+id, updateWatchlistDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateWatchlistDto: UpdateWatchlistDto,
+  ) {
+    return this.watchlistService.update(id, updateWatchlistDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.watchlistService.remove(+id);
+    return this.watchlistService.remove(id);
   }
 }
