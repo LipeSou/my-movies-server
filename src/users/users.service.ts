@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { ListUserDTO } from './dto/list-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { v4 as uuid } from 'uuid';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -18,7 +17,6 @@ export class UsersService {
     userEntity.email = createUserDto.email;
     userEntity.name = createUserDto.name;
     userEntity.password = createUserDto.password;
-    userEntity.id = uuid();
 
     this.userRepository.save(userEntity);
     return {

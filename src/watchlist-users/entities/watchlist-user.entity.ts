@@ -3,6 +3,7 @@ import { Watchlist } from 'src/watchlist/entities/watchlist.entity';
 import {
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -15,11 +16,13 @@ export class WatchlistUser {
   @ManyToOne(() => Watchlist, (watchlist) => watchlist.watchlistUsers, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'watchlist_id' })
   watchlist: Watchlist;
 
   @ManyToOne(() => User, (user) => user.watchlistUsers, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }
