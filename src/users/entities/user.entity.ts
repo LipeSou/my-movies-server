@@ -1,4 +1,5 @@
-import { WatchlistUser } from 'src/watchlist-users/entities/watchlist-user.entity';
+import { Watchlist } from '../../watchlist/entities/watchlist.entity';
+import { WatchlistUser } from '../../watchlist-users/entities/watchlist-user.entity';
 import {
   Entity,
   Column,
@@ -34,4 +35,7 @@ export class User {
 
   @OneToMany(() => WatchlistUser, (watchlistUser) => watchlistUser.user)
   watchlistUsers: WatchlistUser[];
+
+  @OneToMany(() => Watchlist, (watchlist) => watchlist.user)
+  watchlist: Watchlist[];
 }

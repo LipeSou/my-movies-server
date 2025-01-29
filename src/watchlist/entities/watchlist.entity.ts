@@ -1,5 +1,6 @@
-import { WatchlistItem } from 'src/watchlist-item/entities/watchlist-item.entity';
-import { WatchlistUser } from 'src/watchlist-users/entities/watchlist-user.entity';
+import { User } from '../../users/entities/user.entity';
+import { WatchlistItem } from '../../watchlist-item/entities/watchlist-item.entity';
+import { WatchlistUser } from '../../watchlist-users/entities/watchlist-user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,6 +8,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity('watchlists')
@@ -23,9 +26,20 @@ export class Watchlist {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => WatchlistUser, (watchlistUsers) => watchlistUsers.watchlist)
+  @ManyToOne(() => User, (user) => user.watchlist, { onDelete: 'CASCADE' }) // Relacionamento com User
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @OneToMany(
+    () => WatchlistUser,
+    (watchlistUsers) => watchlistUsers.watchlist,
+    { cascade: true },
+  )
   watchlistUsers: WatchlistUser[];
 
-  @OneToMany(() => WatchlistItem, (watchlistItem) => watchlistItem.watchlist)
+  @OneToMany(() => WatchlistItem, (watchlistItem) => watchlistItem.watchlist, {
+    eager: true,
+    cascade: true,
+  })
   items: WatchlistItem[];
 }

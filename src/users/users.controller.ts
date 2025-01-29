@@ -33,7 +33,7 @@ export class UsersController {
         'É necessário fornecer ao menos "id" ou "name" como parâmetro.',
       );
     }
-    return this.usersService.findOne({ id, name });
+    return this.usersService.find({ id, name });
   }
 
   @Patch(':id')

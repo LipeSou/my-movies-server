@@ -1,5 +1,5 @@
-import { User } from 'src/users/entities/user.entity';
-import { Watchlist } from 'src/watchlist/entities/watchlist.entity';
+import { User } from '../../users/entities/user.entity';
+import { Watchlist } from '../../watchlist/entities/watchlist.entity';
 import {
   CreateDateColumn,
   Entity,

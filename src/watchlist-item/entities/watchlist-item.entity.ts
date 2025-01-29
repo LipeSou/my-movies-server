@@ -1,4 +1,4 @@
-import { Watchlist } from 'src/watchlist/entities/watchlist.entity';
+import { Watchlist } from '../../watchlist/entities/watchlist.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -30,6 +30,9 @@ export class WatchlistItem {
 
   @Column({ default: false })
   watched: boolean;
+
+  @CreateDateColumn({ name: 'watched_at', nullable: true })
+  watchedAt: Date;
 
   @Column({ name: 'user_rating', type: 'float', nullable: true })
   userRating: number;

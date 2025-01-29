@@ -3,7 +3,7 @@ import { User } from './entities/user.entity';
 import { ListUserDTO } from './dto/list-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -37,14 +37,26 @@ export class UsersService {
     return users;
   }
 
-  async findOne(query: { id?: string; name?: string }) {
-    const user = await this.userRepository.findOne({
-      where: [{ id: query.id }, { name: query.name }],
-    });
-    if (!user) {
-      throw new Error('Usuário não encontrado');
+  async find(query: { id?: string; name?: string }) {
+    const whereConditions = [];
+
+    if (query.id) {
+      whereConditions.push({ id: query.id });
     }
-    return new ListUserDTO(user.id, user.name, user.email);
+
+    if (query.name) {
+      whereConditions.push({ name: ILike(`%${query.name}%`) }); // Busca insensível a maiúsculas/minúsculas e por substrings
+    }
+
+    const users = await this.userRepository.find({
+      where: whereConditions,
+    });
+
+    if (users.length === 0) {
+      return [];
+    }
+
+    return users.map((user) => new ListUserDTO(user.id, user.name, user.email));
   }
 
   async update(id: string, updateUserDto: Partial<CreateUserDto>) {

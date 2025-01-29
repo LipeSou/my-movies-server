@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateWatchlistDto } from './dto/create-watchlist.dto';
-import { UpdateWatchlistDto } from './dto/list-watchlist.dto';
+import { UpdateWatchlistDto } from './dto/update-watchlist.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Watchlist } from './entities/watchlist.entity';
 import { Repository } from 'typeorm';
-import { WatchlistUser } from 'src/watchlist-users/entities/watchlist-user.entity';
-import { User } from 'src/users/entities/user.entity';
+import { WatchlistUser } from '../watchlist-users/entities/watchlist-user.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class WatchlistService {
@@ -21,55 +21,31 @@ export class WatchlistService {
   ) {}
 
   async create(createWatchlistDto: CreateWatchlistDto) {
-    // const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.userRepository.findOne({
+      where: { id: createWatchlistDto.userId },
+    });
 
-    // if (!user) {
-    //   throw new NotFoundException('Usuário não encontrado');
-    // }
+    if (!user) {
+      throw new NotFoundException(
+        `Usuário com id: ${createWatchlistDto.userId} não foi encontrado`,
+      );
+    }
 
     const watchlist = this.watchlistRepository.create({
       name: createWatchlistDto.name,
+      user,
     });
 
-    const savedWatchlist = await this.watchlistRepository.save(watchlist);
-
-    // Associar o criador como membro (owner) da watchlist
-    // const watchlistUser = this.watchlistUsersRepository.create({
-    //   watchlist: savedWatchlist,
-    //   user,
-    // });
-
-    // await this.watchlistUsersRepository.save(watchlistUser);
-
-    return {
-      message: 'Lita criada com sucesso!',
-      watchlistId: savedWatchlist.id,
-    };
+    return this.watchlistRepository.save(watchlist);
   }
 
-  async findAllByUser() {
-    // const watchlists = await this.watchlistRepository
-    //   .createQueryBuilder('w')
-    //   .innerJoinAndSelect('w.watchlistUsers', 'wu')
-    //   .innerJoinAndSelect('wu.user', 'u')
-    //   .where('wu.user.id = :userId', { userId })
-    //   .getMany();
+  async findAllByUser(userId: string) {
+    const watchlists = await this.watchlistRepository.find({
+      where: { user: { id: userId } },
+      relations: ['user', 'watchlistUsers', 'items'],
+    });
 
-    const watchlists = await this.watchlistRepository
-      .createQueryBuilder('w')
-      .getMany();
-
-    return watchlists.map((watchlist) => ({
-      id: watchlist.id,
-      name: watchlist.name,
-      members:
-        watchlist?.watchlistUsers && watchlist?.watchlistUsers.length > 0
-          ? watchlist.watchlistUsers.map((wu) => ({
-              id: wu.user.id,
-              name: wu.user.name,
-            }))
-          : [],
-    }));
+    return watchlists;
   }
 
   async findOne(id: string) {
@@ -77,6 +53,7 @@ export class WatchlistService {
       where: { id },
       // relations: ['watchlistUsers', 'watchlistUsers.user'],
     });
+
     if (!watchlist) {
       throw new NotFoundException('Watchlist não encontrada');
     }
@@ -91,6 +68,27 @@ export class WatchlistService {
             }))
           : [],
     };
+  }
+
+  async findInvited(userId: string) {
+    const invitedWatchlists = await this.watchlistRepository
+      .createQueryBuilder('watchlist')
+      .innerJoinAndSelect('watchlist.watchlistUsers', 'watchlistUsers')
+      .innerJoinAndSelect('watchlistUsers.user', 'user')
+      .where('user.id = :userId', { userId })
+      .leftJoinAndSelect('watchlist.user', 'creator')
+      .leftJoinAndSelect('watchlist.items', 'items')
+      .getMany();
+
+    return invitedWatchlists.map((watchlist) => ({
+      id: watchlist.id,
+      name: watchlist.name,
+      creator: {
+        id: watchlist.user.id,
+        name: watchlist.user.name,
+      },
+      items: watchlist.items,
+    }));
   }
 
   async update(id: string, updateWatchlistDto: UpdateWatchlistDto) {
@@ -122,5 +120,38 @@ export class WatchlistService {
     return {
       message: 'Lista removida com sucesso',
     };
+  }
+  // Convidar um usuário para uma watchlist
+  async inviteUser(watchlistId: string, userId: string) {
+    const watchlist = await this.watchlistRepository.findOne({
+      where: { id: watchlistId },
+    });
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!watchlist) {
+      throw new NotFoundException('Watchlist não encontrada');
+    }
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    // Verificar se o usuário já está associado à watchlist
+    const existing = await this.watchlistUsersRepository.findOne({
+      where: { watchlist, user },
+    });
+
+    if (existing) {
+      throw new Error('Usuário já associado a esta watchlist');
+    }
+
+    const watchlistUser = this.watchlistUsersRepository.create({
+      watchlist,
+      user,
+    });
+
+    await this.watchlistUsersRepository.save(watchlistUser);
+
+    return { message: 'Usuário convidado com sucesso!' };
   }
 }
