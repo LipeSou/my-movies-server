@@ -27,13 +27,17 @@ export class UsersController {
   }
 
   @Get('search')
-  async findOne(@Query('id') id?: string, @Query('name') name?: string) {
-    if (!id && !name) {
+  async findOne(
+    @Query('id') id?: string,
+    @Query('name') name?: string,
+    @Query('email') email?: string,
+  ) {
+    if (!id && !name && !email) {
       throw new Error(
-        'É necessário fornecer ao menos "id" ou "name" como parâmetro.',
+        'É necessário fornecer ao menos "id" ,"name" ou "email" como parâmetro.',
       );
     }
-    return this.usersService.find({ id, name });
+    return this.usersService.find({ id, name, email });
   }
 
   @Patch(':id')

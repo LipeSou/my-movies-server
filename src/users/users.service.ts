@@ -4,6 +4,7 @@ import { ListUserDTO } from './dto/list-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -12,11 +13,11 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     const userEntity = new User();
     userEntity.email = createUserDto.email;
     userEntity.name = createUserDto.name;
-    userEntity.password = createUserDto.password;
+    userEntity.password = await bcrypt.hash(createUserDto.password, 10);
 
     this.userRepository.save(userEntity);
     return {
@@ -37,7 +38,7 @@ export class UsersService {
     return users;
   }
 
-  async find(query: { id?: string; name?: string }) {
+  async find(query: { id?: string; name?: string; email?: string }) {
     const whereConditions = [];
 
     if (query.id) {
@@ -46,6 +47,10 @@ export class UsersService {
 
     if (query.name) {
       whereConditions.push({ name: ILike(`%${query.name}%`) }); // Busca insensível a maiúsculas/minúsculas e por substrings
+    }
+
+    if (query.email) {
+      whereConditions.push({ email: query.email });
     }
 
     const users = await this.userRepository.find({
