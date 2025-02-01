@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostgresConfigService } from './config/postgres.config.service';
 import { ConfigModule } from '@nestjs/config';
 import { WatchlistUsersModule } from './watchlist-users/watchlist-users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { WatchlistUsersModule } from './watchlist-users/watchlist-users.module';
       useClass: PostgresConfigService,
     }),
     WatchlistUsersModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
