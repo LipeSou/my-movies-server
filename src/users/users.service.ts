@@ -46,7 +46,7 @@ export class UsersService {
     }
 
     if (query.name) {
-      whereConditions.push({ name: ILike(`%${query.name}%`) }); // Busca insensível a maiúsculas/minúsculas e por substrings
+      whereConditions.push({ name: ILike(`%${query.name}%`) });
     }
 
     if (query.email) {
@@ -62,6 +62,20 @@ export class UsersService {
     }
 
     return users.map((user) => new ListUserDTO(user.id, user.name, user.email));
+  }
+
+  async findByEmail(email: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+        'Usuário com o email fornecido não encontrado',
+      );
+    }
+
+    return user;
   }
 
   async update(id: string, updateUserDto: Partial<CreateUserDto>) {

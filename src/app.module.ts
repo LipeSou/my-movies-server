@@ -15,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
     WatchlistModule,
     WatchlistItemModule,
     EpisodeModule,
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

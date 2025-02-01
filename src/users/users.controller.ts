@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { IsEmail } from 'class-validator';
 
 @Controller('users')
 export class UsersController {
@@ -38,6 +40,14 @@ export class UsersController {
       );
     }
     return this.usersService.find({ id, name, email });
+  }
+
+  @Get('search-by-email')
+  async findByEmail(@Query('email') email) {
+    if (!IsEmail(email)) {
+      throw new BadRequestException('O email fornecido é inválido.');
+    }
+    return this.usersService.findByEmail(email);
   }
 
   @Patch(':id')
