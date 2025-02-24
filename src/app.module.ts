@@ -8,6 +8,9 @@ import { PostgresConfigService } from './config/postgres.config.service';
 import { ConfigModule } from '@nestjs/config';
 import { WatchlistUsersModule } from './watchlist-users/watchlist-users.module';
 import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { MeModule } from './me/me.module';
 
 @Module({
   imports: [
@@ -24,8 +27,14 @@ import { AuthModule } from './auth/auth.module';
     }),
     WatchlistUsersModule,
     AuthModule,
+    MeModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
