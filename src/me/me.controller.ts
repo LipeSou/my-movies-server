@@ -1,17 +1,14 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { MeService } from './me.service';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import type { User } from 'src/users/entities/user.entity';
 
 @Controller('me')
 export class MeController {
   constructor(private readonly meService: MeService) {}
 
   @Get()
-  findAll() {
-    return this.meService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.meService.findOne(+id);
+  find(@CurrentUser() user: User) {
+    return this.meService.find(user);
   }
 }

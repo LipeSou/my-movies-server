@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import type { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class MeService {
-  findAll() {
-    return `This action returns all me`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} me`;
+  find(@CurrentUser() user: User) {
+    return user;
   }
 }
